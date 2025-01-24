@@ -1,7 +1,11 @@
 import React, { useState } from 'react'
 import { Alert, StyleSheet, View, AppState } from 'react-native'
+import * as QueryParams from "expo-auth-session/build/QueryParams";
 import { supabase } from '../lib/supabase'
-import { Button, Input } from '@rneui/themed'
+import { makeRedirectUri } from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
+import { Button, Input, Text } from '@rneui/themed'
+import PasswordInput from './PasswordInput';
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -15,10 +19,16 @@ AppState.addEventListener('change', (state) => {
   }
 })
 
+WebBrowser.maybeCompleteAuthSession(); // required for web only
+const redirectTo = makeRedirectUri();
+
 export default function Auth() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isSignUp, setIsSignUp] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
 
   async function signInWithEmail() {
     setLoading(true)
@@ -32,6 +42,11 @@ export default function Auth() {
   }
 
   async function signUpWithEmail() {
+    if (password !== confirmPassword) {
+      setPasswordError('Passwords do not match')
+      return
+    }
+
     setLoading(true)
     const {
       data: { session },
@@ -46,6 +61,44 @@ export default function Auth() {
     setLoading(false)
   }
 
+  const createSessionFromUrl = async (url: string) => {
+    const { params, errorCode } = QueryParams.getQueryParams(url);
+
+    if (errorCode) throw new Error(errorCode);
+    const { access_token, refresh_token } = params;
+
+    if (!access_token) return;
+
+    const { data, error } = await supabase.auth.setSession({
+      access_token,
+      refresh_token,
+    });
+    if (error) throw error;
+    return data.session;
+  };
+
+  type OAuthProvider = 'google' | 'github' | 'facebook' | 'twitter' | 'gitlab' | 'bitbucket';
+  const performOAuth = async (provider: OAuthProvider) => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo,
+        skipBrowserRedirect: true,
+      },
+    });
+    if (error) throw error;
+
+    const res = await WebBrowser.openAuthSessionAsync(
+      data?.url ?? "",
+      redirectTo
+    );
+
+    if (res.type === "success") {
+      const { url } = res;
+      await createSessionFromUrl(url);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={[styles.verticallySpaced, styles.mt20]}>
@@ -59,21 +112,30 @@ export default function Auth() {
         />
       </View>
       <View style={styles.verticallySpaced}>
-        <Input
-          label="Password"
-          leftIcon={{ type: 'font-awesome', name: 'lock' }}
-          onChangeText={(text) => setPassword(text)}
-          value={password}
-          secureTextEntry={true}
-          placeholder="Password"
-          autoCapitalize={'none'}
+        <PasswordInput value={password} onChangeText={(text) => setPassword(text)} />
+      </View>
+      {isSignUp && (
+        <View style={styles.verticallySpaced}>
+          <PasswordInput value={confirmPassword} onChangeText={(text) => setConfirmPassword(text)} />
+          {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+        </View>
+      )}
+      <View style={[styles.verticallySpaced, styles.mt20]}>
+        <Button
+          title={isSignUp ? "Sign up" : "Sign in"}
+          disabled={loading}
+          onPress={isSignUp ? signUpWithEmail : signInWithEmail}
+        />
+      </View>
+      <View style={styles.verticallySpaced}>
+        <Button
+          title={isSignUp ? "Switch to Sign in" : "Switch to Sign up"}
+          type="clear"
+          onPress={() => setIsSignUp(!isSignUp)}
         />
       </View>
       <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button title="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
-      </View>
-      <View style={styles.verticallySpaced}>
-        <Button title="Sign up" disabled={loading} onPress={() => signUpWithEmail()} />
+        <Button title="Google" disabled={loading} onPress={() => performOAuth('google')} />
       </View>
     </View>
   )
@@ -91,5 +153,9 @@ const styles = StyleSheet.create({
   },
   mt20: {
     marginTop: 20,
+  },
+  errorText: {
+    color: 'red',
+    marginTop: 5,
   },
 })
