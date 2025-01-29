@@ -26,6 +26,9 @@
     },
     "expo": {
       "scheme": "com.bookbitesinc.dharmatically"
-    }
+    },
+    "plugins": [
+      "expo-router"
+    ]
   }
 }
