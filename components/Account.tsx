@@ -12,6 +12,7 @@ export default function Account({ session }: { session: Session }) {
 
   useEffect(() => {
     if (session) getProfile()
+    if (session) getActivities()
   }, [session])
 
   async function getProfile() {
@@ -32,6 +33,31 @@ export default function Account({ session }: { session: Session }) {
         setUsername(data.username)
         setWebsite(data.website)
         setAvatarUrl(data.avatar_url)
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert(error.message)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function getActivities() {
+    try {
+      setLoading(true)
+      if (!session?.user) throw new Error('No user on the session!')
+
+      const { data, error, status } = await supabase
+        .from('activities')
+        .select(`name`)
+        // .eq('owner', session?.user.id)
+      if (error && status !== 406) {
+        throw error
+      }
+
+      if (data) {
+        console.log('activities data', data)
       }
     } catch (error) {
       if (error instanceof Error) {
