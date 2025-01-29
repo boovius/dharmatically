@@ -24,9 +24,7 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "expo": {
-      "scheme": "com.bookbitesinc.dharmatically"
-    },
+    "scheme": "com.bookbitesinc.dharmatically",
     "plugins": [
       "expo-router"
     ]
