@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase'
 import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { Button, Input, Text } from '@rneui/themed'
-import PasswordInput from './PasswordInput';
+import PasswordInput from '../components/PasswordInput';
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive

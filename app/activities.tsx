@@ -4,7 +4,7 @@ import { Button, Input, Text } from '@rneui/themed'
 import { Session } from '@supabase/supabase-js'
 import { useActivities } from '../hooks/useActivities'
 
-export default function Account({ session }: { session: Session }) {
+export default function Activities({ session }: { session: Session }) {
   const [newActivity, setNewActivity] = useState('')
   const {
     loading,
