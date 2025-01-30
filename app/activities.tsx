@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { StyleSheet, View, FlatList } from 'react-native'
-import { Button, Input, Text } from '@rneui/themed'
+import { Button, Input } from '@rneui/themed'
 import { useActivities } from '../hooks/useActivities'
 
 export default function Activities() {
@@ -18,7 +18,6 @@ export default function Activities() {
 
   return (
     <View style={styles.container}>
-      <Text h1>Activities</Text>
       <FlatList
         data={activities}
         keyExtractor={(item, index) => index.toString()}
