@@ -9,7 +9,7 @@ interface SessionState {
 
 const useSessionStore = create<SessionState>((set) => ({
   session: null,
-  setSession: (session) => { console.log('setting session in zustand store', session); set({ session })},
+  setSession: (session) => set({ session }),
   clearSession: () => set({ session: null }),
 }));
 

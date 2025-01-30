@@ -14,7 +14,6 @@ export function useActivities() {
     if (session) {
       getActivities()
     } else {
-      console.log('no session in auth')
       router.replace('/auth')
     }
   }, [session])

@@ -28,10 +28,8 @@ export default function App() {
   useEffect(() => {
     if (!loading) {
       if (session && session.user) {
-        console.log('Session found, routing to activities:', session.user);
         router.replace('/activities');
       } else {
-        console.log('No session, routing to auth');
         router.replace('/auth');
       }
     }
