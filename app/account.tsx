@@ -4,13 +4,15 @@ import { StyleSheet, View, Alert } from 'react-native'
 import { Button, Input } from '@rneui/themed'
 import { Session } from '@supabase/supabase-js'
 import { useRouter } from 'expo-router'
+import useSessionStore from '../store/useSessionStore'
 
-export default function Account({ session }: { session: Session }) {
+export default function Account() {
   const [loading, setLoading] = useState(true)
   const [username, setUsername] = useState('')
   const [website, setWebsite] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const router = useRouter()
+  const { session } = useSessionStore()
 
   useEffect(() => {
     if (session) getProfile()
