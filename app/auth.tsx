@@ -5,7 +5,9 @@ import { supabase } from '../lib/supabase'
 import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { Button, Input, Text } from '@rneui/themed'
-import PasswordInput from './PasswordInput';
+import PasswordInput from '../components/PasswordInput';
+import { useRouter } from 'expo-router'
+
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -29,6 +31,7 @@ export default function Auth() {
   const [loading, setLoading] = useState(false)
   const [isSignUp, setIsSignUp] = useState(false)
   const [passwordError, setPasswordError] = useState('')
+  const router = useRouter()
 
   async function signInWithEmail() {
     setLoading(true)
@@ -39,6 +42,7 @@ export default function Auth() {
 
     if (error) Alert.alert(error.message)
     setLoading(false)
+    router.replace("activities");
   }
 
   async function signUpWithEmail() {
@@ -57,8 +61,11 @@ export default function Auth() {
     })
 
     if (error) Alert.alert(error.message)
-    if (!session) Alert.alert('Please check your inbox for email verification!')
+    // if (!session) Alert.alert('Please check your inbox for email verification!')
     setLoading(false)
+    // remove the following and remove the comment above to alert users to email confirmation when
+    // email confirmation is put back in place for sign up
+    router.replace("activities");
   }
 
   const createSessionFromUrl = async (url: string) => {
@@ -74,6 +81,7 @@ export default function Auth() {
       refresh_token,
     });
     if (error) throw error;
+    router.replace("activities");
     return data.session;
   };
 

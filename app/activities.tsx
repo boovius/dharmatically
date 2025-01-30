@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { StyleSheet, View, FlatList } from 'react-native'
-import { Button, Input, Text } from '@rneui/themed'
-import { Session } from '@supabase/supabase-js'
+import { Button, Input } from '@rneui/themed'
 import { useActivities } from '../hooks/useActivities'
 
-export default function Account({ session }: { session: Session }) {
+export default function Activities() {
   const [newActivity, setNewActivity] = useState('')
   const {
     loading,
@@ -15,11 +14,10 @@ export default function Account({ session }: { session: Session }) {
     addActivity,
     saveActivity,
     deleteActivity,
-  } = useActivities(session)
+  } = useActivities()
 
   return (
     <View style={styles.container}>
-      <Text h1>Activities</Text>
       <FlatList
         data={activities}
         keyExtractor={(item, index) => index.toString()}

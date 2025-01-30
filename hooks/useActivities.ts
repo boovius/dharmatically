@@ -1,15 +1,21 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { Alert } from 'react-native'
-import { Session } from '@supabase/supabase-js'
+import useSessionStore from '../store/useSessionStore';
+import { router } from 'expo-router'
 
-export function useActivities(session: Session) {
+export function useActivities() {
   const [loading, setLoading] = useState(true)
   const [activities, setActivities] = useState<{ id: string, name: string, owner: string }[]>([])
   const [editMode, setEditMode] = useState<{ [key: number]: boolean }>({})
+  const { session } = useSessionStore()
 
   useEffect(() => {
-    if (session) getActivities()
+    if (session) {
+      getActivities()
+    } else {
+      router.replace('/auth')
+    }
   }, [session])
 
   async function getActivities() {

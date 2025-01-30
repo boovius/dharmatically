@@ -22,10 +22,12 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     },
-    "expo": {
-      "scheme": "com.bookbitesinc.dharmatically"
-    }
+    "scheme": "com.bookbitesinc.dharmatically",
+    "plugins": [
+      "expo-router"
+    ]
   }
 }
