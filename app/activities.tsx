@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { StyleSheet, View, FlatList } from 'react-native'
 import { Button, Input, Text } from '@rneui/themed'
-import { Session } from '@supabase/supabase-js'
 import { useActivities } from '../hooks/useActivities'
 
-export default function Activities({ session }: { session: Session }) {
+export default function Activities() {
   const [newActivity, setNewActivity] = useState('')
   const {
     loading,
@@ -15,7 +14,7 @@ export default function Activities({ session }: { session: Session }) {
     addActivity,
     saveActivity,
     deleteActivity,
-  } = useActivities(session)
+  } = useActivities()
 
   return (
     <View style={styles.container}>
