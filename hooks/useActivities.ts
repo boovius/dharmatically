@@ -3,12 +3,20 @@ import { supabase } from '../lib/supabase'
 import { Alert } from 'react-native'
 import useSessionStore from '../store/useSessionStore';
 import { router } from 'expo-router'
+import { usePersistentStoreRequest } from './usePersistentStoreRequest'
+
+interface Activity {
+  id: string;
+  name: string;
+  owner: string;
+}
 
 export function useActivities() {
-  const [loading, setLoading] = useState(true)
+  // const [loading, setLoading] = useState(true)
   const [activities, setActivities] = useState<{ id: string, name: string, owner: string }[]>([])
   const [editMode, setEditMode] = useState<{ [key: number]: boolean }>({})
   const { session } = useSessionStore()
+  const { loading, executeQuery, executeMutation} = usePersistentStoreRequest()
 
   useEffect(() => {
     if (session) {
@@ -19,57 +27,36 @@ export function useActivities() {
   }, [session])
 
   async function getActivities() {
-    try {
-      setLoading(true)
-      if (!session?.user) throw new Error('No user on the session!')
-
+    const { data } = await executeQuery(async () => {
       const { data, error, status } = await supabase
         .from('activities')
         .select(`id, name, owner`)
-      if (error && status !== 406) {
-        throw error
-      }
+      if (error) throw error;
+      return { data, error, status }
+    })
 
-      if (data) {
-        setActivities(data)
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message)
-      }
-    } finally {
-      setLoading(false)
+    if (data) {
+      setActivities(data)
     }
   }
 
-  async function addActivity(newActivity: string) {
-    try {
-      setLoading(true)
-      if (!session?.user) throw new Error('No user on the session!')
-
-      const { error } = await supabase
+  async function addActivity(newActivity: string, callback: () => void) {
+    await executeMutation(async () => {
+      const { error, status } = await supabase
         .from('activities')
         .insert([{ name: newActivity, owner: session?.user.id }])
       if (error) {
         throw error
       }
-
       getActivities()
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message)
-      }
-    } finally {
-      setLoading(false)
-    }
+      callback()
+      return { error, status }
+    })
   }
 
   async function saveActivity(index: number) {
-    try {
-      setLoading(true)
-      if (!session?.user) throw new Error('No user on the session!')
-
-      const { error } = await supabase
+    await executeMutation(async () => {
+      const { error, status } = await supabase
         .from('activities')
         .update({ name: activities[index].name })
         .eq('id', activities[index].id)
@@ -79,23 +66,14 @@ export function useActivities() {
 
       setEditMode((prev) => ({ ...prev, [index]: false }))
       getActivities()
-    } catch (error) {
-      if (error instanceof Error) {
-        setEditMode((prev) => ({ ...prev, [index]: false }))
-        Alert.alert(error.message)
-      }
-    } finally {
-      setEditMode((prev) => ({ ...prev, [index]: false }))
-      setLoading(false)
-    }
+
+      return { error, status }
+    })
   }
 
   async function deleteActivity(index: number) {
-    try {
-      setLoading(true)
-      if (!session?.user) throw new Error('No user on the session!')
-
-      const { error } = await supabase
+    await executeMutation(async () => {
+      const { error, status } = await supabase
         .from('activities')
         .delete()
         .eq('id', activities[index].id)
@@ -105,15 +83,8 @@ export function useActivities() {
 
       setActivities((prev) => prev.filter((_, i) => i !== index))
       setEditMode((prev) => ({ ...prev, [index]: false }))
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message)
-      }
-      setEditMode((prev) => ({ ...prev, [index]: false }))
-    } finally {
-      setLoading(false)
-      setEditMode((prev) => ({ ...prev, [index]: false }))
-    }
+      return { error, status }
+    })
   }
 
   return {
