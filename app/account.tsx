@@ -5,24 +5,22 @@ import { Button, Input } from '@rneui/themed'
 import { Session } from '@supabase/supabase-js'
 import { useRouter } from 'expo-router'
 import useSessionStore from '../store/useSessionStore'
+import { usePersistentStoreRequest } from '../hooks/usePersistentStoreRequest'
 
 export default function Account() {
-  const [loading, setLoading] = useState(true)
   const [username, setUsername] = useState('')
   const [website, setWebsite] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const router = useRouter()
   const { session } = useSessionStore()
+  const { loading, executeQuery, executeMutation } = usePersistentStoreRequest()
 
   useEffect(() => {
     if (session) getProfile()
   }, [session])
 
   async function getProfile() {
-    try {
-      setLoading(true)
-      if (!session?.user) throw new Error('No user on the session!')
-
+    await executeQuery(async () => {
       const { data, error, status } = await supabase
         .from('profiles')
         .select(`username, website, avatar_url`)
@@ -37,13 +35,8 @@ export default function Account() {
         setWebsite(data.website)
         setAvatarUrl(data.avatar_url)
       }
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message)
-      }
-    } finally {
-      setLoading(false)
-    }
+      return { data, error, status }
+    })
   }
 
   async function updateProfile({
@@ -55,30 +48,22 @@ export default function Account() {
     website: string
     avatar_url: string
   }) {
-    try {
-      setLoading(true)
-      if (!session?.user) throw new Error('No user on the session!')
 
-      const updates = {
-        id: session?.user.id,
-        username,
-        website,
-        avatar_url,
-        updated_at: new Date(),
-      }
+    const updates = {
+      id: session?.user.id,
+      username,
+      website,
+      avatar_url,
+      updated_at: new Date(),
+    }
 
-      const { error } = await supabase.from('profiles').upsert(updates)
-
+    await executeMutation(async () => {
+      const { error, status } = await supabase.from('profiles').upsert(updates)
       if (error) {
         throw error
       }
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message)
-      }
-    } finally {
-      setLoading(false)
-    }
+      return { error, status }
+    })
   }
 
   return (

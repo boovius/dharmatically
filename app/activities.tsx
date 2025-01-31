@@ -60,7 +60,7 @@ export default function Activities() {
           onChangeText={setNewActivity}
           placeholder="Enter new activity"
         />
-        <Button title="Add Activity" onPress={() => addActivity(newActivity)} disabled={loading || !newActivity} />
+        <Button title="Add Activity" onPress={() => addActivity(newActivity, () => setNewActivity(''))} disabled={loading || !newActivity} />
       </View>
     </View>
   )
