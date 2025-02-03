@@ -3,12 +3,8 @@ import { supabase } from '../lib/supabase'
 import useSessionStore from '../store/useSessionStore';
 import { router } from 'expo-router'
 import { usePersistentStoreRequest } from './usePersistentStoreRequest'
+import { ActivityInstance } from '../types'
 
-interface ActivityInstance {
-  id: string;
-  activity_id: string;
-  created_at: Date;
-}
 
 export function useActivityInstances() {
   const [activityInstances, setActivityInstances] = useState<ActivityInstance[]>([])
