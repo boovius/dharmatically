@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { Alert } from 'react-native'
 import useSessionStore from '../store/useSessionStore';
 import { router } from 'expo-router'
 import { usePersistentStoreRequest } from './usePersistentStoreRequest'
