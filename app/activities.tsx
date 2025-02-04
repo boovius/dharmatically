@@ -63,7 +63,6 @@ export default function Activities() {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 40,
     padding: 12,
     position: 'relative',
     height: '100%',
