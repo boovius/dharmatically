@@ -42,6 +42,7 @@ export default function RootLayout() {
       {/* Override screen options to remove Account avatar for the Account and Auth screens */}
       <Stack.Screen name="account" options={{ headerRight: () => null }} />
       <Stack.Screen name="auth" options={{ headerRight: () => null }} />
+      <Stack.Screen name="forgot-password" options={{ headerRight: () => null }} />
     </Stack>
   )
 }
