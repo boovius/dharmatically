@@ -1,70 +1,24 @@
-import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
-import { StyleSheet, View, Alert } from 'react-native'
-import { Button, Input } from '@rneui/themed'
-import { Session } from '@supabase/supabase-js'
-import { useRouter } from 'expo-router'
-import useSessionStore from '../store/useSessionStore'
-import { usePersistentStoreRequest } from '../hooks/usePersistentStoreRequest'
+import { useRouter } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
+import { Button, Input } from '@rneui/themed';
+import Avatar from '../components/Avatar';
+import { useProfile } from '../hooks/useProfile';
+import useSessionStore from '../store/useSessionStore';
+import { supabase } from '../lib/supabase';
 
 export default function Account() {
-  const [username, setUsername] = useState('')
-  const [website, setWebsite] = useState('')
-  const [avatarUrl, setAvatarUrl] = useState('')
-  const router = useRouter()
-  const { session } = useSessionStore()
-  const { loading, executeQuery, executeMutation } = usePersistentStoreRequest()
-
-  useEffect(() => {
-    if (session) getProfile()
-  }, [session])
-
-  async function getProfile() {
-    await executeQuery(async () => {
-      const { data, error, status } = await supabase
-        .from('profiles')
-        .select(`username, website, avatar_url`)
-        .eq('id', session?.user.id)
-        .single()
-      if (error && status !== 406) {
-        throw error
-      }
-
-      if (data) {
-        setUsername(data.username)
-        setWebsite(data.website)
-        setAvatarUrl(data.avatar_url)
-      }
-      return { data, error, status }
-    })
-  }
-
-  async function updateProfile({
+  const router = useRouter();
+  const {
     username,
+    setUsername,
     website,
-    avatar_url,
-  }: {
-    username: string
-    website: string
-    avatar_url: string
-  }) {
-
-    const updates = {
-      id: session?.user.id,
-      username,
-      website,
-      avatar_url,
-      updated_at: new Date(),
-    }
-
-    await executeMutation(async () => {
-      const { error, status } = await supabase.from('profiles').upsert(updates)
-      if (error) {
-        throw error
-      }
-      return { error, status }
-    })
-  }
+    setWebsite,
+    avatarUrl,
+    setAvatarUrl,
+    loading,
+    updateProfile,
+  } = useProfile();
+  const { session } = useSessionStore();
 
   return (
     <View style={styles.container}>
@@ -76,6 +30,16 @@ export default function Account() {
       </View>
       <View style={styles.verticallySpaced}>
         <Input label="Website" value={website || ''} onChangeText={(text) => setWebsite(text)} />
+      </View>
+      <View style={{ alignSelf: 'center' }}>
+        <Avatar
+          size={200}
+          url={avatarUrl}
+          onUpload={(url: string) => {
+            setAvatarUrl(url);
+            updateProfile({ username, website, avatar_url: url });
+          }}
+        />
       </View>
 
       <View style={[styles.verticallySpaced, styles.mt20]}>
@@ -90,7 +54,7 @@ export default function Account() {
         <Button title="Sign Out" onPress={() => {supabase.auth.signOut(); router.replace('auth')}} />
       </View>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -106,4 +70,4 @@ const styles = StyleSheet.create({
   mt20: {
     marginTop: 20,
   },
-})
+});
