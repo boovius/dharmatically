@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { Alert } from 'react-native'
 import useSessionStore from '../store/useSessionStore';
 import { router } from 'expo-router'
 import { usePersistentStoreRequest } from './usePersistentStoreRequest'
@@ -12,9 +11,7 @@ interface Activity {
 }
 
 export function useActivities() {
-  // const [loading, setLoading] = useState(true)
   const [activities, setActivities] = useState<{ id: string, name: string, owner: string }[]>([])
-  const [editMode, setEditMode] = useState<{ [key: number]: boolean }>({})
   const { session } = useSessionStore()
   const { loading, executeQuery, executeMutation} = usePersistentStoreRequest()
 
@@ -40,49 +37,66 @@ export function useActivities() {
     }
   }
 
-  async function addActivity(newActivity: string, callback: () => void) {
+  async function addActivity(newActivity: string, callback?: () => void) {
     await executeMutation(async () => {
-      const { error, status } = await supabase
+      const { data, error, status } = await supabase
         .from('activities')
         .insert([{ name: newActivity, owner: session?.user.id }])
+        .select()
       if (error) {
         throw error
       }
-      getActivities()
-      callback()
+      if (status === 201) {
+        setActivities((prev) => [...prev, data[0]])
+        callback && callback()
+      }
       return { error, status }
     })
   }
 
-  async function saveActivity(index: number) {
+  async function saveActivity(activityId: string, name: string, callback?: (activity: Activity) => void) {
     await executeMutation(async () => {
-      const { error, status } = await supabase
+      const { data, error, status } = await supabase
         .from('activities')
-        .update({ name: activities[index].name })
-        .eq('id', activities[index].id)
+        .update({ name: name })
+        .eq('id', activityId)
+        .select()
       if (error) {
         throw error
       }
 
-      setEditMode((prev) => ({ ...prev, [index]: false }))
-      getActivities()
+      if (status === 200) {
+        setActivities((prev) => prev.map((activity) => {
+          if (activity.id === activityId) {
+            return data[0]
+          }
+          return activity
+        }))
+        if (callback) {
+          console.log('we are calling back here')
+          callback(data[0])
+        }
+      }
 
       return { error, status }
     })
   }
 
-  async function deleteActivity(index: number) {
+  async function deleteActivity(activityId: string, callback?: () => void) {
     await executeMutation(async () => {
       const { error, status } = await supabase
         .from('activities')
         .delete()
-        .eq('id', activities[index].id)
+        .eq('id', activityId)
       if (error) {
         throw error
       }
 
-      setActivities((prev) => prev.filter((_, i) => i !== index))
-      setEditMode((prev) => ({ ...prev, [index]: false }))
+      if (status === 204) {
+        setActivities((prev) => prev.filter((activity) => activity.id !== activityId))
+        if (callback) callback()
+      }
+
       return { error, status }
     })
   }
@@ -91,8 +105,6 @@ export function useActivities() {
     loading,
     activities,
     setActivities,
-    editMode,
-    setEditMode,
     addActivity,
     saveActivity,
     deleteActivity,

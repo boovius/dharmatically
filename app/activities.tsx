@@ -1,59 +1,40 @@
 import { useState } from 'react'
 import { StyleSheet, View, FlatList } from 'react-native'
-import { Button, Input } from '@rneui/themed'
+import { Button, Input, Text } from '@rneui/themed'
 import { useActivities } from '../hooks/useActivities'
+import { useActivityInstances } from '../hooks/useActivityInstances'
+import { usePersistentStoreRequest } from '../hooks/usePersistentStoreRequest'
+import ActivityListItem from '../components/ActivityListItem'
 
 export default function Activities() {
   const [newActivity, setNewActivity] = useState('')
+  const { loading } = usePersistentStoreRequest()
   const {
-    loading,
     activities,
-    setActivities,
-    editMode,
-    setEditMode,
     addActivity,
     saveActivity,
     deleteActivity,
   } = useActivities()
+  const { activityInstances, addActivityInstance } = useActivityInstances()
 
   return (
     <View style={styles.container}>
       <FlatList
         data={activities}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(_, index) => index.toString()}
         renderItem={({ item, index }) => (
           <View style={styles.verticallySpaced}>
-            {editMode[index] ? (
-              <View>
-                <Input
-                  value={item.name}
-                  onChangeText={(text) => {
-                    const updatedActivities = [...activities]
-                    updatedActivities[index].name = text
-                    setActivities(updatedActivities)
-                  }}
-                />
-                <View style={styles.buttonRow}>
-                  <Button title="Save" onPress={() => saveActivity(index)} />
-                  <View style={styles.buttonSpacer} />
-                  <Button title="Delete" onPress={() => deleteActivity(index)} />
-                </View>
-              </View>
-            ) : (
-              <Input
-                value={item.name}
-                disabled
-                rightIcon={{
-                  type: 'material',
-                  name: 'more-vert',
-                  onPress: () => setEditMode((prev) => ({ ...prev, [index]: true })),
-                }}
-              />
-            )}
+            <ActivityListItem
+              activity={item}
+              activityInstances={activityInstances.filter((instance) => instance.activity_id === item.id)}
+              pressAction={addActivityInstance}
+              saveActivity={saveActivity}
+              deleteActivity={deleteActivity}
+            />
           </View>
         )}
       />
-      <View style={styles.verticallySpaced}>
+      <View style={[styles.verticallySpaced, styles.newActivityContainer]}>
         <Input
           label="New Activity"
           value={newActivity}
@@ -70,20 +51,19 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 40,
     padding: 12,
+    position: 'relative',
+    height: '100%',
   },
   verticallySpaced: {
     paddingTop: 4,
     paddingBottom: 4,
     alignSelf: 'stretch',
   },
-  buttonRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  buttonSpacer: {
-    width: 16,
-  },
-  mt20: {
-    marginTop: 20,
+  newActivityContainer: {
+    position: 'absolute',
+    bottom: 50,
+    left: 0,
+    right: 0,
+    padding: 12,
   },
 })
