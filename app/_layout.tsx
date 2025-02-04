@@ -1,9 +1,27 @@
+import { useEffect, useState } from 'react';
 import { Stack, useRouter } from 'expo-router';
-import { Image, TouchableOpacity } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { Text } from '@rneui/themed';
+import { useProfile } from '../hooks/useProfile';
+import useSessionStore from '../store/useSessionStore';
+import AvatarImage from '../components/AvatarImage';
+import { downloadImage } from '../lib/fileStorage';
 
 export default function RootLayout() {
   const router = useRouter();
+  const { avatarUrl, getProfile } = useProfile();
+  const { session } = useSessionStore();
+  const [imageData, setImageData] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (session) getProfile();
+  }, [session]);
+
+  useEffect(() => {
+    if (avatarUrl) {
+      downloadImage(avatarUrl, setImageData)
+    }
+  }, [avatarUrl])
 
   return (
     <Stack
@@ -16,10 +34,7 @@ export default function RootLayout() {
         ),
         headerRight: () => (
           <TouchableOpacity onPress={() => router.push('/account')} style={{ marginRight: 15 }}>
-            <Image
-              source={{ uri: 'https://i.pravatar.cc/300' }} // Placeholder Avatar
-              style={{ width: 35, height: 35, borderRadius: 20 }}
-            />
+            <AvatarImage avatarUrl={imageData} size={24} round />
           </TouchableOpacity>
         ),
       }}
