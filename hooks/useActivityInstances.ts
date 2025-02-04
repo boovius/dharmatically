@@ -19,11 +19,12 @@ export function useActivityInstances() {
     }
   }, [session])
 
-  async function getActivityInstances() {
+  async function getActivityInstances(from: Date = new Date('1970-01-01T00:00:00Z')) {
     const { data } = await executeQuery(async () => {
       const { data, error, status } = await supabase
         .from('activity_instances')
         .select(`id, activity_id, created_at`)
+        .gte('created_at', from.toISOString())
       if (error) throw error;
       return { data, error, status }
     })
