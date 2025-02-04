@@ -23,7 +23,7 @@ export default function Activities() {
     if (tabIndex === 0) {
       getActivityInstances(oneWeekAgo())
     } else {
-      getActivityInstances(new Date())
+      getActivityInstances(new Date()) // this is purposefully off right now to show a difference in behavior
     }
   }, [tabIndex])
 
