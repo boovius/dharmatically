@@ -1,70 +1,23 @@
-import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
-import { StyleSheet, View, Alert } from 'react-native'
-import { Button, Input } from '@rneui/themed'
-import { Session } from '@supabase/supabase-js'
-import { useRouter } from 'expo-router'
-import useSessionStore from '../store/useSessionStore'
-import { usePersistentStoreRequest } from '../hooks/usePersistentStoreRequest'
+import { useRouter } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
+import { Button, Input } from '@rneui/themed';
+import { useProfile } from '../hooks/useProfile';
+import useSessionStore from '../store/useSessionStore';
+import { supabase } from '../lib/supabase';
 
 export default function Account() {
-  const [username, setUsername] = useState('')
-  const [website, setWebsite] = useState('')
-  const [avatarUrl, setAvatarUrl] = useState('')
-  const router = useRouter()
-  const { session } = useSessionStore()
-  const { loading, executeQuery, executeMutation } = usePersistentStoreRequest()
-
-  useEffect(() => {
-    if (session) getProfile()
-  }, [session])
-
-  async function getProfile() {
-    await executeQuery(async () => {
-      const { data, error, status } = await supabase
-        .from('profiles')
-        .select(`username, website, avatar_url`)
-        .eq('id', session?.user.id)
-        .single()
-      if (error && status !== 406) {
-        throw error
-      }
-
-      if (data) {
-        setUsername(data.username)
-        setWebsite(data.website)
-        setAvatarUrl(data.avatar_url)
-      }
-      return { data, error, status }
-    })
-  }
-
-  async function updateProfile({
+  const router = useRouter();
+  const {
     username,
+    setUsername,
     website,
-    avatar_url,
-  }: {
-    username: string
-    website: string
-    avatar_url: string
-  }) {
-
-    const updates = {
-      id: session?.user.id,
-      username,
-      website,
-      avatar_url,
-      updated_at: new Date(),
-    }
-
-    await executeMutation(async () => {
-      const { error, status } = await supabase.from('profiles').upsert(updates)
-      if (error) {
-        throw error
-      }
-      return { error, status }
-    })
-  }
+    setWebsite,
+    avatarUrl,
+    setAvatarUrl,
+    loading,
+    updateProfile,
+  } = useProfile();
+  const { session } = useSessionStore();
 
   return (
     <View style={styles.container}>
