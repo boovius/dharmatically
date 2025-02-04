@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { StyleSheet, View, FlatList } from 'react-native'
-import { Button, Input, Text } from '@rneui/themed'
+import { Button, Input, Tab } from '@rneui/themed'
 import { useActivities } from '../hooks/useActivities'
 import { useActivityInstances } from '../hooks/useActivityInstances'
 import { usePersistentStoreRequest } from '../hooks/usePersistentStoreRequest'
 import ActivityListItem from '../components/ActivityListItem'
+import { oneWeekAgo, oneMonthAgo } from '../utils/dates'
 
 export default function Activities() {
   const [newActivity, setNewActivity] = useState('')
@@ -15,10 +16,23 @@ export default function Activities() {
     saveActivity,
     deleteActivity,
   } = useActivities()
-  const { activityInstances, addActivityInstance } = useActivityInstances()
+  const { activityInstances, addActivityInstance, getActivityInstances } = useActivityInstances()
+  const [tabIndex, setTabIndex] = useState(0);
+
+  useEffect(() => {
+    if (tabIndex === 0) {
+      getActivityInstances(oneWeekAgo())
+    } else {
+      getActivityInstances(new Date())
+    }
+  }, [tabIndex])
 
   return (
     <View style={styles.container}>
+      <Tab value={tabIndex} onChange={setTabIndex} dense>
+        <Tab.Item title="Week" />
+        <Tab.Item title="Month" />
+      </Tab>
       <FlatList
         data={activities}
         keyExtractor={(_, index) => index.toString()}
