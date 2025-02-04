@@ -34,7 +34,7 @@ export default function Activities() {
           </View>
         )}
       />
-      <View style={styles.verticallySpaced}>
+      <View style={[styles.verticallySpaced, styles.newActivityContainer]}>
         <Input
           label="New Activity"
           value={newActivity}
@@ -51,10 +51,19 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 40,
     padding: 12,
+    position: 'relative',
+    height: '100%',
   },
   verticallySpaced: {
     paddingTop: 4,
     paddingBottom: 4,
     alignSelf: 'stretch',
+  },
+  newActivityContainer: {
+    position: 'absolute',
+    bottom: 50,
+    left: 0,
+    right: 0,
+    padding: 12,
   },
 })
