@@ -142,9 +142,16 @@ export default function Auth() {
           onPress={() => setIsSignUp(!isSignUp)}
         />
       </View>
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button title="Google" disabled={loading} onPress={() => performOAuth('google')} />
+      <View style={styles.verticallySpaced}>
+        <Button
+          title="Forgot Password"
+          type="clear"
+          onPress={() => router.push("forgot-password")}
+        />
       </View>
+      {/* <View style={[styles.verticallySpaced, styles.mt20]}>
+        <Button title="Google" disabled={loading} onPress={() => performOAuth('google')} />
+      </View> */}
     </View>
   )
 }
