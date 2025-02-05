@@ -8,7 +8,7 @@ const ForgotPasswordScreen: React.FC = () => {
 
   const handleResetPassword = async () => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'yourapp://reset-password',
+      redirectTo: 'dharmatically://reset-password',
     });
 
     if (error) {
