@@ -1,3 +1,4 @@
+import 'expo-dev-client';
 import { useEffect, useState } from 'react';
 import { Stack, useRouter } from 'expo-router';
 import { TouchableOpacity, View } from 'react-native';
