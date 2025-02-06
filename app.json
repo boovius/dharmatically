@@ -13,13 +13,18 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bookbitesinc.Dharmatically",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.bookbitesinc.Dharmatically"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -28,6 +33,14 @@
     "scheme": "com.bookbitesinc.dharmatically",
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "8df9c33a-3953-4b0e-8f51-e6b0a2e51e8b"
+      }
+    }
   }
 }
