@@ -7,6 +7,7 @@ import * as WebBrowser from "expo-web-browser";
 import { Button, Input, Text } from '@rneui/themed'
 import PasswordInput from '../components/PasswordInput';
 import { useRouter } from 'expo-router'
+import useSessionStore from '../store/useSessionStore';
 
 
 // Tells Supabase Auth to continuously refresh the session automatically if
@@ -32,17 +33,26 @@ export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [passwordError, setPasswordError] = useState('')
   const router = useRouter()
+  const { setSession } = useSessionStore();
 
   async function signInWithEmail() {
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({
+
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     })
 
-    if (error) Alert.alert(error.message)
+    if (error) {
+      Alert.alert(error.message);
+    } else if (data.session) {
+      setSession(data.session)
+      router.replace("activities");
+    } else {
+      Alert.alert("Error", "Error retrieving user session.");
+    }
+
     setLoading(false)
-    router.replace("activities");
   }
 
   async function signUpWithEmail() {
