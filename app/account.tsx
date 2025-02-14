@@ -1,10 +1,11 @@
-import { useRouter } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { useRouter, Router } from 'expo-router';
+import { Alert, StyleSheet, View } from 'react-native';
 import { Button, Input } from '@rneui/themed';
 import Avatar from '../components/Avatar';
 import { useProfile } from '../hooks/useProfile';
 import useSessionStore from '../store/useSessionStore';
 import { supabase } from '../lib/supabase';
+
 
 export default function Account() {
   const router = useRouter();

@@ -119,6 +119,9 @@ export default function Auth() {
 
   return (
     <View style={styles.container}>
+      <View style={{height: 200, width: 200, alignSelf: "center", justifyContent: "center", alignItems: "center", backgroundColor: "gray"}}>
+        <Text>Logo Placeholder</Text>
+      </View>
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Input
           label="Email"
@@ -170,6 +173,7 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 40,
     padding: 12,
+    paddingTop: 100,
   },
   verticallySpaced: {
     paddingTop: 4,
