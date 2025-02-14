@@ -6,6 +6,7 @@ import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { Button, Input, Text } from '@rneui/themed'
 import PasswordInput from '../components/PasswordInput';
+import KeyboardAvoidingComponent from '../components/KeyboardAvoidingComponent';
 import { useRouter } from 'expo-router'
 import useSessionStore from '../store/useSessionStore';
 
@@ -118,7 +119,7 @@ export default function Auth() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingComponent>
       <View style={{height: 200, width: 200, alignSelf: "center", justifyContent: "center", alignItems: "center", backgroundColor: "gray"}}>
         <Text>Logo Placeholder</Text>
       </View>
@@ -165,7 +166,7 @@ export default function Auth() {
       {/* <View style={[styles.verticallySpaced, styles.mt20]}>
         <Button title="Google" disabled={loading} onPress={() => performOAuth('google')} />
       </View> */}
-    </View>
+    </KeyboardAvoidingComponent>
   )
 }
 
