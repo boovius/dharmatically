@@ -19,7 +19,18 @@ export default function Account() {
     loading,
     updateProfile,
   } = useProfile();
-  const { session } = useSessionStore();
+  const { session, clearSession } = useSessionStore();
+
+  async function handleSignOut() {
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      Alert.alert('Error logging out:', error.message)
+      return;
+    } else {
+      clearSession()
+      router.replace('/auth')
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -52,7 +63,7 @@ export default function Account() {
       </View>
 
       <View style={styles.verticallySpaced}>
-        <Button title="Sign Out" onPress={() => {supabase.auth.signOut(); router.replace('auth')}} />
+        <Button title="Sign Out" onPress={handleSignOut} />
       </View>
     </View>
   );
