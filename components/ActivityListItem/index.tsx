@@ -39,7 +39,7 @@ const ActivityInstancesComponent: React.FC<ActivityInstancesProps> = ({
           <Text style={{ fontSize: 18, fontWeight: "bold", marginRight: 30 }}>
             {activityInstances.length}
           </Text>
-          <TouchableOpacity onPress={() => { console.log('setting edit mode'); setEditMode((prev) => !prev)}}>
+          <TouchableOpacity onPress={() => setEditMode((prev) => !prev)}>
             <MaterialIcons name="more-vert" size={24} color="black" />
           </TouchableOpacity>
         </View>
