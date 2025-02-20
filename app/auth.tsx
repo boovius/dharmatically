@@ -6,7 +6,9 @@ import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { Button, Input, Text } from '@rneui/themed'
 import PasswordInput from '../components/PasswordInput';
+import KeyboardAvoidingComponent from '../components/KeyboardAvoidingComponent';
 import { useRouter } from 'expo-router'
+import useSessionStore from '../store/useSessionStore';
 
 
 // Tells Supabase Auth to continuously refresh the session automatically if
@@ -32,17 +34,26 @@ export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [passwordError, setPasswordError] = useState('')
   const router = useRouter()
+  const { setSession } = useSessionStore();
 
   async function signInWithEmail() {
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({
+
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     })
 
-    if (error) Alert.alert(error.message)
+    if (error) {
+      Alert.alert(error.message);
+    } else if (data.session) {
+      setSession(data.session)
+      router.replace("activities");
+    } else {
+      Alert.alert("Error", "Error retrieving user session.");
+    }
+
     setLoading(false)
-    router.replace("activities");
   }
 
   async function signUpWithEmail() {
@@ -108,7 +119,10 @@ export default function Auth() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingComponent>
+      <View style={{height: 200, width: 200, alignSelf: "center", justifyContent: "center", alignItems: "center", backgroundColor: "gray"}}>
+        <Text>Logo Placeholder</Text>
+      </View>
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Input
           label="Email"
@@ -152,7 +166,7 @@ export default function Auth() {
       {/* <View style={[styles.verticallySpaced, styles.mt20]}>
         <Button title="Google" disabled={loading} onPress={() => performOAuth('google')} />
       </View> */}
-    </View>
+    </KeyboardAvoidingComponent>
   )
 }
 
@@ -160,6 +174,7 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 40,
     padding: 12,
+    paddingTop: 100,
   },
   verticallySpaced: {
     paddingTop: 4,

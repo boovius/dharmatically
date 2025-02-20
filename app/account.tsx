@@ -1,10 +1,11 @@
-import { useRouter } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { useRouter, Router } from 'expo-router';
+import { Alert, StyleSheet, View } from 'react-native';
 import { Button, Input } from '@rneui/themed';
 import Avatar from '../components/Avatar';
 import { useProfile } from '../hooks/useProfile';
 import useSessionStore from '../store/useSessionStore';
 import { supabase } from '../lib/supabase';
+
 
 export default function Account() {
   const router = useRouter();
@@ -18,7 +19,18 @@ export default function Account() {
     loading,
     updateProfile,
   } = useProfile();
-  const { session } = useSessionStore();
+  const { session, clearSession } = useSessionStore();
+
+  async function handleSignOut() {
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      Alert.alert('Error logging out:', error.message)
+      return;
+    } else {
+      clearSession()
+      router.replace('/auth')
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -51,7 +63,7 @@ export default function Account() {
       </View>
 
       <View style={styles.verticallySpaced}>
-        <Button title="Sign Out" onPress={() => {supabase.auth.signOut(); router.replace('auth')}} />
+        <Button title="Sign Out" onPress={handleSignOut} />
       </View>
     </View>
   );
