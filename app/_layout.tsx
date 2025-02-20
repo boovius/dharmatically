@@ -1,6 +1,7 @@
 import 'expo-dev-client';
 import { useEffect, useState } from 'react';
 import { Stack, useRouter } from 'expo-router';
+import * as Linking from 'expo-linking';
 import { TouchableOpacity, View } from 'react-native';
 import { Text } from '@rneui/themed';
 import { useProfile } from '../hooks/useProfile';
@@ -13,6 +14,17 @@ export default function RootLayout() {
   const { avatarUrl, getProfile } = useProfile();
   const { session } = useSessionStore();
   const [imageData, setImageData] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleDeepLink = (event: { url: any; }) => {
+      console.log("Deep link event:", event.url);
+    };
+
+    const subscription = Linking.addEventListener('url', handleDeepLink);
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   useEffect(() => {
     if (session) getProfile();
