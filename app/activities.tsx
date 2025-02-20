@@ -10,6 +10,7 @@ import { oneWeekAgo, oneMonthAgo } from '../utils/dates'
 
 export default function Activities() {
   const [newActivity, setNewActivity] = useState('')
+  const [filterText, setFilterText] = useState('')
   const [modalVisible, setModalVisible] = useState(false)
   const { loading } = usePersistentStoreRequest()
   const {
@@ -29,14 +30,24 @@ export default function Activities() {
     }
   }, [tabIndex])
 
+  const filteredActivities = activities.filter(activity =>
+    activity.name.toLowerCase().includes(filterText.toLowerCase())
+  )
+
   return (
       <View style={styles.container}>
         <Tab value={tabIndex} onChange={setTabIndex} dense>
           <Tab.Item title="Week" />
           <Tab.Item title="Month" />
         </Tab>
+        <Input
+          placeholder="Filter activities"
+          value={filterText}
+          onChangeText={setFilterText}
+          style={styles.filterInput}
+        />
         <FlatList
-          data={activities}
+          data={filteredActivities}
           keyExtractor={(_, index) => index.toString()}
           style={{ flex: 1, marginBottom: 100 }}
           renderItem={({ item, index }) => (
@@ -111,6 +122,9 @@ const styles = StyleSheet.create({
     position: 'relative',
     height: '100%',
     flex: 1,
+  },
+  filterInput: {
+    marginBottom: 10,
   },
   verticallySpaced: {
     paddingTop: 4,
