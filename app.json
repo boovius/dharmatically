@@ -32,6 +32,11 @@
       "bundler": "metro"
     },
     "scheme": "dharmatically",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "plugins": [
       "expo-router"
     ],
