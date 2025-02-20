@@ -27,14 +27,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>com.bookbitesinc.dharmatically</string>
-          <string>com.bookbitesinc.Dharmatically</string>
-        </array>
-      </dict>
-      <dict>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>exp+dharmatically</string>
+          <string>dharmatically</string>
         </array>
       </dict>
     </array>
