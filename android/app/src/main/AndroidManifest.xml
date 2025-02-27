@@ -26,8 +26,6 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="dharmatically"/>
-        <data android:scheme="com.bookbitesinc.Dharmatically"/>
-        <data android:scheme="exp+dharmatically"/>
       </intent-filter>
     </activity>
   </application>

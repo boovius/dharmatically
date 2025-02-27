@@ -14,7 +14,8 @@ const ForgotPasswordScreen: React.FC = () => {
     if (error) {
       Alert.alert('Error', error.message);
     } else {
-      Alert.alert('Success', 'Password reset email sent!');
+      Alert.alert('Success', 'Password reset email requested. Please check your email inbox.');
+      setEmail('');
     }
   };
 

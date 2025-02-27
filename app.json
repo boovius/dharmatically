@@ -31,7 +31,12 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "scheme": "com.bookbitesinc.dharmatically",
+    "scheme": "dharmatically",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "plugins": [
       "expo-router"
     ],

@@ -1,39 +1,89 @@
 import { useEffect, useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
+import * as Linking from 'expo-linking';
 import { supabase } from '../lib/supabase';  // Adjust path if needed
 import { Button, Input, Text, Overlay } from '@rneui/themed';
 
 export default function ResetPassword() {
   const router = useRouter();
-  const { access_token } = useLocalSearchParams<{access_token: string}>();
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(true);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [expiresIn, setExpiresIn] = useState<string | null>(null);
+  const [tokenType, setTokenType] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [errorDescription, setErrorDescription] = useState<string | null>(null);
 
   useEffect(() => {
-    const handleAuth = async () => {
-      if (access_token) {
-        const { error } = await supabase.auth.setSession({
-          access_token,
-          refresh_token: '', // Not needed here
-        });
-
-        if (error) {
-          Alert.alert('Error', 'Invalid or expired token.');
-          router.replace('/forgot-password');
-        } else {
-          setLoading(false);
-        }
+    const getInitialURL = async () => {
+      const url = await Linking.getInitialURL();
+      console.log("initial url", url); // Debugging
+      if (url) {
+        handleDeepLink(url);
       } else {
-        Alert.alert('Error', 'No token found.');
-        router.replace('/forgot-password');
+        setLoading(false);
       }
     };
 
-    handleAuth();
-  }, [access_token]);
+    const handleDeepLink = (url: string) => {
+      setLoading(false);
+
+      // Extract fragment (#error=...)
+      const hashIndex = url.indexOf('#');
+      if (hashIndex !== -1) {
+        const fragment = url.substring(hashIndex + 1); // Remove the `#`
+        console.log("Extracted Fragment:", fragment); // Debugging
+
+        // Manually parse the fragment string
+        const params: { [key: string]: string } = {};
+        fragment.split('&').forEach((pair) => {
+          const [key, value] = pair.split('=');
+          if (key && value) {
+            params[key] = decodeURIComponent(value.replace(/\+/g, ' ')); // Handle URL encoding
+          }
+        });
+
+        // Update state with extracted values
+        setAccessToken(params.access_token || null);
+        setRefreshToken(params.refresh_token || null);
+        setExpiresAt(params.expires_at || null);
+        setExpiresIn(params.expires_in || null);
+        setTokenType(params.token_type || null);
+        setError(params.error || null);
+        setErrorCode(params.error_code || null);
+        setErrorDescription(params.error_description || null);
+
+        if (params.error) {
+          Alert.alert('Error', params.error_description || 'An unknown error occurred.');
+          router.replace('/auth');
+        }
+      }
+    };
+
+    // Listen for new deep links
+    const subscription = Linking.addEventListener('url', (event) => {
+      console.log("Received Deep Link:", event.url); // Debugging
+      handleDeepLink(event.url);
+    });
+
+    getInitialURL(); // Check if the app was opened from a deep link initially
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match.');
+      return;
+    }
+
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });
@@ -62,6 +112,12 @@ export default function ResetPassword() {
         secureTextEntry
         value={newPassword}
         onChangeText={setNewPassword}
+      />
+      <Input
+        placeholder="Confirm new password"
+        secureTextEntry
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
       />
       <Button title="Change Password" onPress={handleChangePassword} />
     </View>
