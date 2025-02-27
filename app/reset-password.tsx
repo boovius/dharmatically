@@ -4,14 +4,15 @@ import { useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
 import { supabase } from '../lib/supabase';  // Adjust path if needed
 import { Button, Input, Text, Overlay } from '@rneui/themed';
-import useSessionStore from '../store/useSessionStore';
 
 export default function ResetPassword() {
   const router = useRouter();
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(true);
-  // const { setSession } = useSessionStore();
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string | null>('');
+  const [errorCode, setErrorCode] = useState<string | null>('');
+  const [errorDescription, setErrorDescription] = useState<string | null>('');
 
   useEffect(() => {
     const getInitialURL = async () => {
@@ -21,17 +22,30 @@ export default function ResetPassword() {
 
     const handleDeepLink = (url: string) => {
       setLoading(false);
-      console.log("Deep Link Received:", url);
 
-      debugger;
-      // Extract error from URL fragment (#error=...)
+      // Extract fragment (#error=...)
       const hashIndex = url.indexOf('#');
       if (hashIndex !== -1) {
-        const fragment = url.substring(hashIndex + 1); // Get everything after #
-        const params = new URLSearchParams(fragment);
-        const errorMessage = params.get('error_description'); // Extract the 'error' parameter
-        if (errorMessage) {
-          setError(errorMessage);
+        const fragment = url.substring(hashIndex + 1); // Remove the `#`
+        console.log("Extracted Fragment:", fragment); // Debugging
+
+        // Manually parse the fragment string
+        const params: { [key: string]: string } = {};
+        fragment.split('&').forEach((pair) => {
+          const [key, value] = pair.split('=');
+          if (key && value) {
+            params[key] = decodeURIComponent(value.replace(/\+/g, ' ')); // Handle URL encoding
+          }
+        });
+
+        // Update state with extracted values
+        setError(params.error || null);
+        setErrorCode(params.error_code || null);
+        setErrorDescription(params.error_description || null);
+
+        if (params.error) {
+          Alert.alert('Error', params.error_description || 'An unknown error occurred.');
+          router.replace('/auth');
         }
       }
     };
@@ -47,52 +61,13 @@ export default function ResetPassword() {
       subscription.remove();
     };
   }, []);
-  //   const fetchSession = async () => {
-  //     if (error) {
-  //       Alert.alert('Error', error);
-  //       router.replace('/forgot-password');
-  //       return;
-  //     }
-
-  //     const { data } = await supabase.auth.getSession();
-
-  //     if (!data) {
-  //       Alert.alert('Error', 'Unable to retrieve authenticated user session.');
-  //       router.replace('/auth');
-  //       setLoading(false); // Done loading once session is set
-  //       return;
-  //     }
-
-  //     setSession(data.session);
-  //     setLoading(false); // Done loading once session is set
-  //   };
-
-  //   fetchSession();
-  // }, []);
-  // useEffect(() => {
-  //   const handleAuth = async () => {
-  //     if (access_token) {
-  //       const { error } = await supabase.auth.setSession({
-  //         access_token,
-  //         refresh_token: '', // Not needed here
-  //       });
-
-  //       if (error) {
-  //         Alert.alert('Error', 'Invalid or expired token.');
-  //         router.replace('/forgot-password');
-  //       } else {
-  //         setLoading(false);
-  //       }
-  //     } else {
-  //       Alert.alert('Error', 'No token found.');
-  //       router.replace('/forgot-password');
-  //     }
-  //   };
-
-  //   handleAuth();
-  // }, [access_token]);
 
   const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match.');
+      return;
+    }
+
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });
@@ -121,6 +96,12 @@ export default function ResetPassword() {
         secureTextEntry
         value={newPassword}
         onChangeText={setNewPassword}
+      />
+      <Input
+        placeholder="Confirm new password"
+        secureTextEntry
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
       />
       <Button title="Change Password" onPress={handleChangePassword} />
     </View>
