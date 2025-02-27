@@ -10,14 +10,24 @@ export default function ResetPassword() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>('');
-  const [errorCode, setErrorCode] = useState<string | null>('');
-  const [errorDescription, setErrorDescription] = useState<string | null>('');
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
+  const [expiresIn, setExpiresIn] = useState<string | null>(null);
+  const [tokenType, setTokenType] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [errorDescription, setErrorDescription] = useState<string | null>(null);
 
   useEffect(() => {
     const getInitialURL = async () => {
       const url = await Linking.getInitialURL();
-      if (url) handleDeepLink(url);
+      console.log("initial url", url); // Debugging
+      if (url) {
+        handleDeepLink(url);
+      } else {
+        setLoading(false);
+      }
     };
 
     const handleDeepLink = (url: string) => {
@@ -39,6 +49,11 @@ export default function ResetPassword() {
         });
 
         // Update state with extracted values
+        setAccessToken(params.access_token || null);
+        setRefreshToken(params.refresh_token || null);
+        setExpiresAt(params.expires_at || null);
+        setExpiresIn(params.expires_in || null);
+        setTokenType(params.token_type || null);
         setError(params.error || null);
         setErrorCode(params.error_code || null);
         setErrorDescription(params.error_description || null);
@@ -52,6 +67,7 @@ export default function ResetPassword() {
 
     // Listen for new deep links
     const subscription = Linking.addEventListener('url', (event) => {
+      console.log("Received Deep Link:", event.url); // Debugging
       handleDeepLink(event.url);
     });
 
